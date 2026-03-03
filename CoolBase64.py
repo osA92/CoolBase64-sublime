@@ -74,11 +74,17 @@ class Base64SaveAsBinaryCommand(sublime_plugin.TextCommand):
             with open(selected_path, 'wb') as f:
                 f.write(binary_data)
 
-        suggested_name = "decoded_file"
         view = self.view
         for s in view.sel():
             if s.empty():
                 break
 
+            if view.file_name():
+                path = view.file_name().rsplit('\\', 1)[0]
+                suggested_name = view.file_name().rsplit('\\', 1)[1]
+            else:
+                path = ""
+                suggested_name = "decoded_file"
+
             binary_data = base64.b64decode(view.substr(s))
-            sublime.save_dialog(save_decoded_binary, name=suggested_name)
+            sublime.save_dialog(save_decoded_binary, directory=path, name=suggested_name)

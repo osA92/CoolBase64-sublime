@@ -65,3 +65,26 @@ class CopyFileAsBase64WebUrlCommand(sublime_plugin.WindowCommand):
         sublime.set_clipboard(url)
 
         print("%s copied as %s Base64 Web URL" % (fileinfo["file_name"], datatype))
+
+class Base64SaveAsBinaryCommand(sublime_plugin.TextCommand): 
+    def run(self, edit):
+        def save_decoded_binary(selected_path):
+            if not selected_path:
+                return
+            with open(selected_path, 'wb') as f:
+                f.write(binary_data)
+
+        view = self.view
+        for s in view.sel():
+            if s.empty():
+                break
+
+            if view.file_name():
+                path = view.file_name().rsplit('\\', 1)[0]
+                suggested_name = view.file_name().rsplit('\\', 1)[1]
+            else:
+                path = ""
+                suggested_name = "decoded_file"
+
+            binary_data = base64.b64decode(view.substr(s))
+            sublime.save_dialog(save_decoded_binary, directory=path, name=suggested_name)

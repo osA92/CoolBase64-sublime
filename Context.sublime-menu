@@ -18,6 +18,11 @@
 	    "id" : "copy_file_as_base64_web_url",
     	"caption" : "Copy File as Base64 Web URL",
     	"command" : "copy_file_as_base64_web_url"
+		},
+		{
+	    "id" : "base64_save_as_binary",
+    	"caption" : "Decode Selected Text from Base64 to Binary File",
+    	"command" : "base64_save_as_binary"
 		}
 	]
 }

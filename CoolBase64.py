@@ -22,7 +22,7 @@ class Base64DecodeCommand(sublime_plugin.TextCommand):
         view = self.view
         for s in view.sel():
             if s.empty():
-                break
+                continue
             enc_s = view.substr(s)
             if len(enc_s) % 4 == 2:
                 enc_s += "=="
@@ -74,18 +74,28 @@ class CopyFileAsBase64WebUrlCommand(sublime_plugin.WindowCommand):
 
         print("%s copied as %s Base64 Web URL" % (fileinfo["file_name"], datatype))
 
-class Base64SaveAsBinaryCommand(sublime_plugin.TextCommand): 
+class Base64SaveAsBinaryCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        def save_decoded_binary(selected_path):
-            if not selected_path:
+        def process(index):
+            if index >= len(selections):
                 return
-            with open(selected_path, 'wb') as f:
-                f.write(binary_data)
+            binary_data, path, suggested_name = selections[index]
+
+            def on_done(selected_path):
+                if selected_path:
+                    with open(selected_path, 'wb') as f:
+                        f.write(binary_data)
+                # Переходим к следующему выделению, независимо от того, сохранили или отменили
+                process(index + 1)
+
+            sublime.save_dialog(on_done, directory=path, name=suggested_name)
 
         view = self.view
+        selections = []
+
         for s in view.sel():
             if s.empty():
-                break
+                continue
             enc_s = view.substr(s)
             if len(enc_s) % 4 == 2:
                 enc_s += "=="
@@ -100,4 +110,6 @@ class Base64SaveAsBinaryCommand(sublime_plugin.TextCommand):
                 suggested_name = "decoded_file"
 
             binary_data = base64.b64decode(enc_s)
-            sublime.save_dialog(save_decoded_binary, directory=path, name=suggested_name)
+            selections.append((binary_data, path, suggested_name))
+
+        process(0)
